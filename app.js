@@ -52,7 +52,7 @@ app.use('/categories', categoryRouter);
 
 // Serve React app for all non-API routes (last route)
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve('build', 'index.html'));
+    res.sendFile(path.resolve('dist', 'index.html'));
 });
 
 
