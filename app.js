@@ -21,7 +21,7 @@ import cookieParser from "cookie-parser";
 app.use(cors({
     optionsSuccessStatus: 200,
     credentials: true,
-    origin: ["http://localhost:9999"]
+    origin: ["http://localhost:9999","https://buy-wise.onrender.com/"]
 }));
 
 app.use(express.json());
