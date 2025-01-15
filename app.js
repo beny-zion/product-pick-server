@@ -44,7 +44,7 @@ app.use('/analytics', analyticsRouter);
 
 app.use('/user', authRouter);
 
-app.use('/product', productRouter);
+app.use('/products', productRouter);
 
 app.use('/categories', categoryRouter);
 
