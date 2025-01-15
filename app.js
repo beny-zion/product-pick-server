@@ -2,6 +2,8 @@
 import { config } from "dotenv";
 import { connectToMongoDB } from "./src/config/DB.js";
 import "./src/config/cloudinary.js";
+import path from 'path';
+
 // import passport from 'passport';
 // import './config/passport.js';
 
