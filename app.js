@@ -44,10 +44,14 @@ app.use('/analytics', analyticsRouter);
 
 app.use('/user', authRouter);
 
-app.use('/products', productRouter);
+app.use('/product', productRouter);
 
 app.use('/categories', categoryRouter);
 
+// Serve React app for all non-API routes (last route)
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve('build', 'index.html'));
+});
 
 
 
