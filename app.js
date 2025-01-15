@@ -1,60 +1,53 @@
-// Config the env and DB conncetion
+// Config imports
 import { config } from "dotenv";
 import { connectToMongoDB } from "./src/config/DB.js";
 import "./src/config/cloudinary.js";
-import path from 'path';
-
-// import passport from 'passport';
-// import './config/passport.js';
-
-// app.use(passport.initialize());
-config();
-connectToMongoDB();
-
-// Define the server with express library
 import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Route imports
+import { authRouter } from './src/routes/auth.route.js';
+import { productRouter } from './src/routes/product.route.js';
+import { categoryRouter } from './src/routes/category.route.js';
+import { analyticsRouter } from './src/routes/analytics.routes.js';
+import { vendorRouter } from './src/routes/vendor.routes.js';
+
+// Initialize app
+config();
 const app = express();
 const port = Number(process.env.PORT) || 3003;
 
-// Global Middlewares (imports + use)
-import cors from "cors";
-import cookieParser from "cookie-parser";
+// Connect to DB
+connectToMongoDB();
 
+// Basic Middlewares
 app.use(cors({
     optionsSuccessStatus: 200,
     credentials: true,
     origin: ["http://localhost:9999","https://buy-wise.onrender.com"]
 }));
-
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes (imports + use)
+// Static files middleware
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'dist')));
 
-import {authRouter }from './src/routes/auth.route.js';
-import { productRouter } from './src/routes/product.route.js';
-import { categoryRouter } from './src/routes/category.route.js';
-// import {VendorAnalyticsRouter} from './src/routes/vendor.analytics.routes.js';
-import {analyticsRouter} from './src/routes/analytics.routes.js';
-import { vendorRouter } from './src/routes/vendor.routes.js';
-
-
-// Routes
+// API Routes
 app.use('/vendor', vendorRouter);
-
 app.use('/analytics', analyticsRouter);
-
 app.use('/user', authRouter);
-
 app.use('/products', productRouter);
-
 app.use('/categories', categoryRouter);
 
-// Serve React app for all non-API routes (last route)
+// Catch-all handler for React Router
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve('dist', 'index.html'));
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-
-
+// Start server
 app.listen(port, () => console.log(`Server running on port:http://localhost:${port}`));
