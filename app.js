@@ -41,7 +41,7 @@ app.use(express.static(path.join(__dirname, 'client-build')));
 app.use('/vendor', vendorRouter);
 app.use('/analytics', analyticsRouter);
 app.use('/user', authRouter);
-app.use('/product', productRouter);
+app.use('/products', productRouter);
 app.use('/categories', categoryRouter);
 
 app.get('*', (req, res) => {
