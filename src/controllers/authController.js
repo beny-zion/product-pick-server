@@ -17,10 +17,10 @@ const setCookieToken = (res, token) => {
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     path: '/',
-    withCredentials: true
+    sameSite: 'none', // נדרש לצורך עבודה בין דומיינים
+    secure: true, // עובד רק ב-HTTPS
   });
 };
-
 // authController.js
 export const register = async (req, res) => {
   try {
