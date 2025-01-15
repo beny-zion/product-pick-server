@@ -11,8 +11,7 @@
 .pnp.js
 
 # Build outputs
-/dist
-/build
+
 
 # Testing
 /coverage

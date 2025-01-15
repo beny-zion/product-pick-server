@@ -35,7 +35,7 @@ app.use(cookieParser());
 // Static files middleware
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'client-build')));
 
 // API Routes
 app.use('/vendor', vendorRouter);
@@ -44,9 +44,8 @@ app.use('/user', authRouter);
 app.use('/products', productRouter);
 app.use('/categories', categoryRouter);
 
-// Catch-all handler for React Router
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client-build', 'index.html')); // גם פה שינינו ל-client-build
 });
 
 // Start server
