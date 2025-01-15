@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   },
   isVendor: {
     type: Boolean,
-    default: false
+    default: true // Default to vendor account
   },
   productsLimit: {
     type: Number,

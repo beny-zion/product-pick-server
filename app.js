@@ -32,10 +32,15 @@ app.use(cookieParser());
 import {authRouter }from './src/routes/auth.route.js';
 import { productRouter } from './src/routes/product.route.js';
 import { categoryRouter } from './src/routes/category.route.js';
+// import {VendorAnalyticsRouter} from './src/routes/vendor.analytics.routes.js';
+import {analyticsRouter} from './src/routes/analytics.routes.js';
+import { vendorRouter } from './src/routes/vendor.routes.js';
 
 
+// Routes
+app.use('/vendor', vendorRouter);
 
-
+app.use('/analytics', analyticsRouter);
 
 app.use('/user', authRouter);
 

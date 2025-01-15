@@ -48,7 +48,8 @@ export const createProduct = async (req, res) => {
 export const getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
-      .populate('vendorId', 'fullName profileImage');
+      .populate('vendorId', 'fullName profileImage')
+      .populate('mainCategory', 'name');
 
     if (!product) {
       return res.status(404).json({
@@ -128,6 +129,11 @@ export const updateProduct = async (req, res) => {
       if (req.body.recommendation) {
         updates.recommendation = req.body.recommendation;
       }
+
+      // אם יש קטגוריה ראשית חדשה
+    if (req.body.mainCategory) {
+      updates.mainCategory = req.body.mainCategory;
+    }
   
       // מוודאים שהמשתמש הוא בעל המוצר
       const product = await Product.findOne({ _id: productId, vendorId: req.user._id });
@@ -143,7 +149,8 @@ export const updateProduct = async (req, res) => {
         productId,
         { $set: updates },
         { new: true }
-      ).populate('vendorId', 'fullName profileImage');
+      ).populate('vendorId', 'fullName profileImage')
+      .populate('mainCategory', 'name');
   
       res.json({
         success: true,
