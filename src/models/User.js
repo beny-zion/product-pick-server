@@ -1,3 +1,4 @@
+/* needed */
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
@@ -51,16 +52,17 @@ const userSchema = new mongoose.Schema({
   lastLogin: Date
 });
 
-// Pre-save middleware to hash password
+// Pre-save middleware to hash password - only if password exists
 userSchema.pre('save', async function(next) {
-  if (this.isModified('password')) {
+  if (this.isModified('password') && this.password) {
     this.password = await bcrypt.hash(this.password, 10);
   }
   next();
 });
 
-// Method to compare password
+// Method to compare password - check if password exists first
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 

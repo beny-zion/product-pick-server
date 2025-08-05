@@ -1,31 +1,41 @@
+/* needed */
+// routes/auth.route.js
 import express from 'express';
-import { check } from 'express-validator';
-import * as authController from '../controllers/authController.js';
 import passport from 'passport';
-import { upload } from '../middlewares/middleware.upload.js';
+import * as authController from '../controllers/authController.js';
 import { auth } from '../middlewares/middleware.auth.js';
-
+import { upload } from '../middlewares/middleware.upload.js';
 
 const router = express.Router();
 
-const registerValidation = [
-  check('email', 'Please include a valid email').isEmail(),
-  check('password', 'Password must be 6 or more characters').isLength({ min: 6 }),
-  check('fullName', 'Full name is required').not().isEmpty()
-];
+// נתיבי אימות Google עם טיפול משופר בשגיאות
+router.get('/google', (req, res, next) => {
+  console.log('Starting Google OAuth flow');
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    accessType: 'offline',
+    prompt: 'consent'
+  })(req, res, next);
+});
 
-router.post('/register',upload.single('profileImage'),registerValidation,authController.register);
+router.get('/google/callback',
+  (req, res, next) => {
+    console.log('Google callback received');
+    passport.authenticate('google', { 
+      session: false,
+      failureRedirect: 'http://localhost:9999/login?error=oauth_failed'
+    })(req, res, next);
+  },
+  authController.googleCallback
+);
 
-router.post('/login', authController.login);
-
-router.put('/profile', auth, upload.single('profileImage'), authController.updateProfile);
-
-router.get('/google',passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-router.get('/google/callback',passport.authenticate('google', { session: false }),authController.googleCallback);
-
+// קבלת משתמש נוכחי
 router.get('/current', auth, authController.getCurrentUser);
 
+// התנתקות
 router.post('/logout', authController.logout);
+
+// עדכון פרופיל
+router.put('/profile', auth, upload.single('profileImage'), authController.updateProfile);
 
 export { router as authRouter };

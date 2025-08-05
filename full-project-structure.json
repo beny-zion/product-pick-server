@@ -1,0 +1,648 @@
+{
+  "path": "/",
+  "type": "directory",
+  "items": [
+    {
+      "name": ".env",
+      "path": ".env",
+      "type": "file",
+      "extension": "",
+      "size": 746,
+      "modified": "2025-05-27T10:30:04.822Z"
+    },
+    {
+      "name": "README.md",
+      "path": "README.md",
+      "type": "file",
+      "extension": ".md",
+      "size": 48,
+      "modified": "2025-01-12T22:36:01.428Z"
+    },
+    {
+      "name": "app.js",
+      "path": "app.js",
+      "type": "file",
+      "extension": ".js",
+      "size": 2893,
+      "modified": "2025-07-06T08:54:10.372Z"
+    },
+    {
+      "path": "client-build",
+      "type": "directory",
+      "items": [
+        {
+          "path": "client-build\\assets",
+          "type": "directory",
+          "items": [
+            {
+              "name": "index-BgXAd-UB.css",
+              "path": "client-build\\assets\\index-BgXAd-UB.css",
+              "type": "file",
+              "extension": ".css",
+              "size": 31811,
+              "modified": "2025-01-15T16:11:31.522Z"
+            },
+            {
+              "name": "index-CDbIFdFW.js",
+              "path": "client-build\\assets\\index-CDbIFdFW.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 506507,
+              "modified": "2025-01-15T16:11:31.524Z"
+            },
+            {
+              "name": "new-CLMRlBBz.svg",
+              "path": "client-build\\assets\\new-CLMRlBBz.svg",
+              "type": "file",
+              "extension": ".svg",
+              "size": 15253,
+              "modified": "2025-01-15T16:11:31.520Z"
+            }
+          ]
+        },
+        {
+          "name": "index.html",
+          "path": "client-build\\index.html",
+          "type": "file",
+          "extension": ".html",
+          "size": 454,
+          "modified": "2025-01-15T16:11:31.520Z"
+        },
+        {
+          "name": "new.svg",
+          "path": "client-build\\new.svg",
+          "type": "file",
+          "extension": ".svg",
+          "size": 15253,
+          "modified": "2025-01-15T00:46:56.462Z"
+        },
+        {
+          "name": "vite.svg",
+          "path": "client-build\\vite.svg",
+          "type": "file",
+          "extension": ".svg",
+          "size": 1497,
+          "modified": "2024-12-26T09:53:48.276Z"
+        }
+      ]
+    },
+    {
+      "name": "map-full-project.js",
+      "path": "map-full-project.js",
+      "type": "file",
+      "extension": ".js",
+      "size": 5366,
+      "modified": "2025-03-17T11:36:49.974Z"
+    },
+    {
+      "name": "package-lock.json",
+      "path": "package-lock.json",
+      "type": "file",
+      "extension": ".json",
+      "size": 105078,
+      "modified": "2025-06-18T10:41:16.281Z"
+    },
+    {
+      "name": "package.json",
+      "path": "package.json",
+      "type": "file",
+      "extension": ".json",
+      "size": 870,
+      "modified": "2025-06-18T10:41:16.217Z"
+    },
+    {
+      "path": "scripts",
+      "type": "directory",
+      "items": [
+        {
+          "name": "importCategories.js",
+          "path": "scripts\\importCategories.js",
+          "type": "file",
+          "extension": ".js",
+          "size": 6411,
+          "modified": "2025-01-09T21:19:35.637Z"
+        }
+      ]
+    },
+    {
+      "path": "src",
+      "type": "directory",
+      "items": [
+        {
+          "path": "src\\config",
+          "type": "directory",
+          "items": [
+            {
+              "name": "DB.js",
+              "path": "src\\config\\DB.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 328,
+              "modified": "2025-07-14T22:08:00.937Z"
+            },
+            {
+              "name": "aliexpress.config.js",
+              "path": "src\\config\\aliexpress.config.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 1341,
+              "modified": "2025-01-23T12:13:32.759Z"
+            },
+            {
+              "name": "cloudinary.js",
+              "path": "src\\config\\cloudinary.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 302,
+              "modified": "2025-07-14T22:08:23.467Z"
+            },
+            {
+              "name": "passport.js",
+              "path": "src\\config\\passport.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 2136,
+              "modified": "2025-07-14T22:09:50.583Z"
+            }
+          ]
+        },
+        {
+          "path": "src\\controllers",
+          "type": "directory",
+          "items": [
+            {
+              "name": "aliexpress.controller.js",
+              "path": "src\\controllers\\aliexpress.controller.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 8732,
+              "modified": "2025-07-14T22:25:44.006Z"
+            },
+            {
+              "path": "src\\controllers\\analytics",
+              "type": "directory",
+              "items": [
+                {
+                  "name": "productStats.controller.js",
+                  "path": "src\\controllers\\analytics\\productStats.controller.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 2582,
+                  "modified": "2025-07-14T22:12:49.292Z"
+                },
+                {
+                  "name": "vendor.analytics.controller.js",
+                  "path": "src\\controllers\\analytics\\vendor.analytics.controller.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 2505,
+                  "modified": "2025-07-14T22:14:34.657Z"
+                },
+                {
+                  "name": "vendor.products.controller.js",
+                  "path": "src\\controllers\\analytics\\vendor.products.controller.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 4245,
+                  "modified": "2025-07-14T22:15:28.622Z"
+                }
+              ]
+            },
+            {
+              "name": "authController.js",
+              "path": "src\\controllers\\authController.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 4430,
+              "modified": "2025-07-14T22:11:15.652Z"
+            },
+            {
+              "name": "commentController.js",
+              "path": "src\\controllers\\commentController.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 11501,
+              "modified": "2025-07-14T22:19:27.360Z"
+            },
+            {
+              "name": "favoriteController.js",
+              "path": "src\\controllers\\favoriteController.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 3170,
+              "modified": "2025-07-14T22:18:23.502Z"
+            },
+            {
+              "name": "fullProductController.js",
+              "path": "src\\controllers\\fullProductController.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 9052,
+              "modified": "2025-07-14T22:17:46.817Z"
+            },
+            {
+              "name": "search.controller.js",
+              "path": "src\\controllers\\search.controller.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 4516,
+              "modified": "2025-07-14T22:21:00.322Z"
+            },
+            {
+              "name": "vendor.questions.controller.js",
+              "path": "src\\controllers\\vendor.questions.controller.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 6911,
+              "modified": "2025-07-14T22:20:17.438Z"
+            }
+          ]
+        },
+        {
+          "path": "src\\middlewares",
+          "type": "directory",
+          "items": [
+            {
+              "name": "middleware.auth.id.js",
+              "path": "src\\middlewares\\middleware.auth.id.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 838,
+              "modified": "2025-07-14T22:12:35.731Z"
+            },
+            {
+              "name": "middleware.auth.js",
+              "path": "src\\middlewares\\middleware.auth.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 828,
+              "modified": "2025-07-14T22:11:44.859Z"
+            },
+            {
+              "name": "middleware.upload.js",
+              "path": "src\\middlewares\\middleware.upload.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 297,
+              "modified": "2025-07-14T22:12:03.075Z"
+            }
+          ]
+        },
+        {
+          "path": "src\\models",
+          "type": "directory",
+          "items": [
+            {
+              "name": "AliexpressToken.js",
+              "path": "src\\models\\AliexpressToken.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 512,
+              "modified": "2025-07-14T22:08:44.160Z"
+            },
+            {
+              "name": "Comment.js",
+              "path": "src\\models\\Comment.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 2823,
+              "modified": "2025-07-14T22:19:38.445Z"
+            },
+            {
+              "name": "CommentNotification.js",
+              "path": "src\\models\\CommentNotification.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 1130,
+              "modified": "2025-07-14T22:19:48.135Z"
+            },
+            {
+              "name": "Favorite.js",
+              "path": "src\\models\\Favorite.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 585,
+              "modified": "2025-07-14T22:18:28.193Z"
+            },
+            {
+              "name": "FullProduct.js",
+              "path": "src\\models\\FullProduct.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 4354,
+              "modified": "2025-07-14T22:13:15.243Z"
+            },
+            {
+              "name": "ProductStats.js",
+              "path": "src\\models\\ProductStats.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 1367,
+              "modified": "2025-07-14T22:13:24.929Z"
+            },
+            {
+              "name": "User.js",
+              "path": "src\\models\\User.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 1590,
+              "modified": "2025-07-14T22:10:02.752Z"
+            }
+          ]
+        },
+        {
+          "path": "src\\routes",
+          "type": "directory",
+          "items": [
+            {
+              "name": "aliexpress.routes.js",
+              "path": "src\\routes\\aliexpress.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 628,
+              "modified": "2025-07-14T22:17:07.681Z"
+            },
+            {
+              "name": "analytics.routes.js",
+              "path": "src\\routes\\analytics.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 755,
+              "modified": "2025-07-14T22:29:34.297Z"
+            },
+            {
+              "name": "auth.route.js",
+              "path": "src\\routes\\auth.route.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 1284,
+              "modified": "2025-07-14T22:10:41.335Z"
+            },
+            {
+              "name": "comment.routes.js",
+              "path": "src\\routes\\comment.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 933,
+              "modified": "2025-07-14T22:18:56.322Z"
+            },
+            {
+              "name": "favorite.routes.js",
+              "path": "src\\routes\\favorite.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 901,
+              "modified": "2025-07-14T22:18:13.128Z"
+            },
+            {
+              "name": "fullProduct.route.js",
+              "path": "src\\routes\\fullProduct.route.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 889,
+              "modified": "2025-07-14T22:17:35.945Z"
+            },
+            {
+              "name": "search.routes.js",
+              "path": "src\\routes\\search.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 867,
+              "modified": "2025-07-14T23:13:38.176Z"
+            },
+            {
+              "name": "vendor.questions.routes.js",
+              "path": "src\\routes\\vendor.questions.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 944,
+              "modified": "2025-07-14T22:20:08.705Z"
+            },
+            {
+              "name": "vendor.routes.js",
+              "path": "src\\routes\\vendor.routes.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 1182,
+              "modified": "2025-06-27T12:24:52.157Z"
+            }
+          ]
+        },
+        {
+          "path": "src\\services",
+          "type": "directory",
+          "items": [
+            {
+              "path": "src\\services\\aliexpress",
+              "type": "directory",
+              "items": [
+                {
+                  "name": "product.service.js",
+                  "path": "src\\services\\aliexpress\\product.service.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 4787,
+                  "modified": "2025-07-14T22:16:11.523Z"
+                },
+                {
+                  "name": "token.service.js",
+                  "path": "src\\services\\aliexpress\\token.service.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 4206,
+                  "modified": "2025-07-14T22:08:33.988Z"
+                }
+              ]
+            },
+            {
+              "path": "src\\services\\analytics",
+              "type": "directory",
+              "items": [
+                {
+                  "name": "aggregation.service.js",
+                  "path": "src\\services\\analytics\\aggregation.service.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 2624,
+                  "modified": "2025-07-14T22:14:41.156Z"
+                },
+                {
+                  "name": "productStats.service.js",
+                  "path": "src\\services\\analytics\\productStats.service.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 4559,
+                  "modified": "2025-07-14T22:13:05.034Z"
+                }
+              ]
+            },
+            {
+              "name": "productUpdateService.js",
+              "path": "src\\services\\productUpdateService.js",
+              "type": "file",
+              "extension": ".js",
+              "size": 2269,
+              "modified": "2025-07-14T22:24:39.338Z"
+            },
+            {
+              "path": "src\\services\\search",
+              "type": "directory",
+              "items": [
+                {
+                  "name": "searchService.js",
+                  "path": "src\\services\\search\\searchService.js",
+                  "type": "file",
+                  "extension": ".js",
+                  "size": 19350,
+                  "modified": "2025-07-14T22:21:07.147Z"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "uploads",
+      "type": "directory",
+      "items": [
+        {
+          "name": "1735773513731-IMG_1933.JPG",
+          "path": "uploads\\1735773513731-IMG_1933.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 3566434,
+          "modified": "2025-01-01T23:18:33.776Z"
+        },
+        {
+          "name": "1735773660652-IMG_1933.JPG",
+          "path": "uploads\\1735773660652-IMG_1933.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 3566434,
+          "modified": "2025-01-01T23:21:00.695Z"
+        },
+        {
+          "name": "1735775525111-IMG_1933.JPG",
+          "path": "uploads\\1735775525111-IMG_1933.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 3566434,
+          "modified": "2025-01-01T23:52:05.338Z"
+        },
+        {
+          "name": "1736174681188-IMG_1933.JPG",
+          "path": "uploads\\1736174681188-IMG_1933.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 3566434,
+          "modified": "2025-01-06T14:44:41.209Z"
+        },
+        {
+          "name": "1736175845705-IMG_1850.JPG",
+          "path": "uploads\\1736175845705-IMG_1850.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 6372896,
+          "modified": "2025-01-06T15:05:21.251Z"
+        },
+        {
+          "name": "1736175991511-IMG_1850.JPG",
+          "path": "uploads\\1736175991511-IMG_1850.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 6511532,
+          "modified": "2025-01-06T15:07:48.609Z"
+        },
+        {
+          "name": "1736176266977-20241106_103425.jpg",
+          "path": "uploads\\1736176266977-20241106_103425.jpg",
+          "type": "file",
+          "extension": ".jpg",
+          "size": 3062548,
+          "modified": "2025-01-06T15:11:45.966Z"
+        },
+        {
+          "name": "1736176627852-IMG_1931.JPG",
+          "path": "uploads\\1736176627852-IMG_1931.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 4985397,
+          "modified": "2025-01-06T15:18:06.928Z"
+        },
+        {
+          "name": "1736176672389-IMG_1933.JPG",
+          "path": "uploads\\1736176672389-IMG_1933.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 3566434,
+          "modified": "2025-01-06T15:17:52.426Z"
+        },
+        {
+          "name": "1736176732964-IMG_1933.JPG",
+          "path": "uploads\\1736176732964-IMG_1933.JPG",
+          "type": "file",
+          "extension": ".JPG",
+          "size": 3566434,
+          "modified": "2025-01-06T15:19:35.081Z"
+        },
+        {
+          "name": "1736177469837-11.40.31.jpeg",
+          "path": "uploads\\1736177469837-11.40.31.jpeg",
+          "type": "file",
+          "extension": ".jpeg",
+          "size": 118469,
+          "modified": "2025-01-06T15:31:11.047Z"
+        },
+        {
+          "name": "1736200337483-shopping.webp",
+          "path": "uploads\\1736200337483-shopping.webp",
+          "type": "file",
+          "extension": ".webp",
+          "size": 7544,
+          "modified": "2025-01-06T21:52:17.518Z"
+        },
+        {
+          "name": "1736200842534-××¤×¨×¡×§.jpg",
+          "path": "uploads\\1736200842534-××¤×¨×¡×§.jpg",
+          "type": "file",
+          "extension": ".jpg",
+          "size": 4246,
+          "modified": "2025-01-06T22:00:42.537Z"
+        },
+        {
+          "name": "1736443180881-20240408_140437.jpg",
+          "path": "uploads\\1736443180881-20240408_140437.jpg",
+          "type": "file",
+          "extension": ".jpg",
+          "size": 2365585,
+          "modified": "2025-01-09T17:19:40.905Z"
+        },
+        {
+          "name": "1741600228066-jewish-wedding-bride-groom-kippah-600w-2323686285.webp",
+          "path": "uploads\\1741600228066-jewish-wedding-bride-groom-kippah-600w-2323686285.webp",
+          "type": "file",
+          "extension": ".webp",
+          "size": 30916,
+          "modified": "2025-03-10T09:50:28.098Z"
+        },
+        {
+          "name": "1741600373844-×¨××ª ×× ×××¡ (1).png",
+          "path": "uploads\\1741600373844-×¨××ª ×× ×××¡ (1).png",
+          "type": "file",
+          "extension": ".png",
+          "size": 10335,
+          "modified": "2025-03-10T09:52:53.863Z"
+        },
+        {
+          "name": "1747673407430-20250508_112849.jpg",
+          "path": "uploads\\1747673407430-20250508_112849.jpg",
+          "type": "file",
+          "extension": ".jpg",
+          "size": 4694214,
+          "modified": "2025-05-19T16:50:07.496Z"
+        }
+      ]
+    }
+  ]
+}

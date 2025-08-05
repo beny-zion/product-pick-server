@@ -1,94 +1,84 @@
-// services/aggregation.service.js
+/* needed */
+// services/analytics/aggregation.service.js - גרסה מפושטת
 import mongoose from 'mongoose';
 import ProductStats from '../../models/ProductStats.js';
 
 export const AggregationService = {
-  async getVendorStats(vendorId, period = 'week') {
+  // קבלת סטטיסטיקות מוכר
+  async getVendorStats(vendorId) {
     try {
-      console.log("!!!!!!!!!");
-      
-      // תחילה נבדוק אם יש בכלל סטטיסטיקות למוכר
-      const hasStats = await ProductStats.exists({ vendorId: new mongoose.Types.ObjectId(vendorId) });
-      
-      if (!hasStats) {
-        console.log("No stats found for vendor");
-        // מחזירים אובייקט ריק עם ערכי ברירת מחדל
-        return {
-          totalViews: 0,
-          totalClicks: 0,
-          averageViewDuration: 0,
-          conversionRate: 0,
-          productStats: []
-        };
-      }
-
-      const periodFilter = this._getPeriodFilter(period);
-      
       const stats = await ProductStats.aggregate([
         { 
           $match: { 
             vendorId: new mongoose.Types.ObjectId(vendorId)
-            // הסרת התנאי על hourlyStats.date כי הוא גורם לבעיות
           }
         },
         {
-          $group: {
-            _id: '$productId',
-            totalViews: { 
-              $sum: { 
-                $ifNull: ['$dailyStats.totalViews', 0] 
-              }
-            },
-            totalClicks: { 
-              $sum: { 
-                $ifNull: ['$dailyStats.totalClicks', 0] 
-              }
-            },
-            averageViewDuration: { 
-              $avg: { 
-                $ifNull: ['$dailyStats.averageViewTime', 0] 
-              }
-            }
+          $lookup: {
+            from: 'fullproducts',
+            localField: 'productId',
+            foreignField: '_id',
+            as: 'product'
           }
+        },
+        {
+          $unwind: {
+            path: '$product',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            _id: '$productId',
+            modalOpens: 1,
+            clicks: 1,
+            conversionRate: {
+              $cond: [
+                { $gt: ['$modalOpens', 0] },
+                { $multiply: [{ $divide: ['$clicks', '$modalOpens'] }, 100] },
+                0
+              ]
+            },
+            productTitle: '$product.title',
+            productImage: { $ifNull: ['$product.displayImage', ''] }
+          }
+        },
+        {
+          $sort: { modalOpens: -1 }
         }
       ]);
 
-      console.log("Stats found:", this._formatStats(stats));
+      console.log(`[AGGREGATION] Found ${stats.length} products for vendor ${vendorId}`);
       
-      return this._formatStats(stats);
+      return this._formatVendorStats(stats);
     } catch (error) {
-      console.error("Error in getVendorStats:", error);
+      console.error('[AGGREGATION] Error in getVendorStats:', error);
       throw error;
     }
   },
 
-  _getPeriodFilter(period) {
-    const now = new Date();
-    switch (period) {
-      case 'day':
-        return { $gte: new Date(now.setDate(now.getDate() - 1)) };
-      case 'week':
-        return { $gte: new Date(now.setDate(now.getDate() - 7)) };
-      case 'month':
-        return { $gte: new Date(now.setMonth(now.getMonth() - 1)) };
-      default:
-        return { $gte: new Date(now.setDate(now.getDate() - 7)) };
-    }
-  },
+  // עיצוב תוצאות הסטטיסטיקות
+  _formatVendorStats(stats) {
+    const totalModalOpens = stats.reduce((sum, stat) => sum + (stat.modalOpens || 0), 0);
+    const totalClicks = stats.reduce((sum, stat) => sum + (stat.clicks || 0), 0);
+    const averageConversionRate = totalModalOpens > 0 ? (totalClicks / totalModalOpens) * 100 : 0;
 
-  _formatStats(stats) {
     return {
-      totalViews: stats.reduce((sum, stat) => sum + stat.totalViews, 0),
-      totalClicks: stats.reduce((sum, stat) => sum + stat.totalClicks, 0),
-      averageViewDuration: stats.reduce((sum, stat) => sum + stat.averageViewDuration, 0) / stats.length,
-      conversionRate: this._calculateConversionRate(stats),
-      productStats: stats
+      // סיכום כללי
+      totalModalOpens,
+      totalClicks,
+      averageConversionRate: Math.round(averageConversionRate * 100) / 100,
+      totalProducts: stats.length,
+      
+      // סטטיסטיקות לפי מוצר
+      productStats: stats.map(stat => ({
+        productId: stat._id,
+        productTitle: stat.productTitle || 'ללא כותרת',
+        productImage: stat.productImage || '',
+        modalOpens: stat.modalOpens || 0,
+        clicks: stat.clicks || 0,
+        conversionRate: Math.round((stat.conversionRate || 0) * 100) / 100
+      }))
     };
-  },
-
-  _calculateConversionRate(stats) {
-    const totalViews = stats.reduce((sum, stat) => sum + stat.totalViews, 0);
-    const totalClicks = stats.reduce((sum, stat) => sum + stat.totalClicks, 0);
-    return totalViews ? (totalClicks / totalViews) * 100 : 0;
   }
 };

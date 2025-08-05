@@ -1,3 +1,4 @@
+/* needed */
 import mongoose from "mongoose";
 
 export const connectToMongoDB = () => {

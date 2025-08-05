@@ -1,20 +1,19 @@
+/* needed */
+// controllers/analytics/productStats.controller.js - גרסה מפושטת
 import { ProductStatsService } from '../../services/analytics/productStats.service.js';
 
 export const ProductStatsController = {
-  // תיעוד צפייה במוצר
-  async trackView(req, res) {
+  // תיעוד פתיחת מודל מוצר
+  async trackModalOpen(req, res) {
     try {
-      const { productId, viewDuration } = req.body;
+      const { productId } = req.body;
       const userId = req.user?.id; // אופציונלי
 
-      const stats = await ProductStatsService.trackView(
-        productId, 
-        viewDuration,
-        userId
-      );
+      await ProductStatsService.trackModalOpen(productId, userId);
 
-      res.json({ success: true, stats });
+      res.json({ success: true });
     } catch (error) {
+      console.error('Error tracking modal open:', error);
       res.status(500).json({ 
         success: false, 
         message: error.message 
@@ -28,13 +27,11 @@ export const ProductStatsController = {
       const { productId } = req.body;
       const userId = req.user?.id;
 
-      const stats = await ProductStatsService.trackClick(
-        productId,
-        userId
-      );
+      await ProductStatsService.trackClick(productId, userId);
 
-      res.json({ success: true, stats });
+      res.json({ success: true });
     } catch (error) {
+      console.error('Error tracking click:', error);
       res.status(500).json({ 
         success: false, 
         message: error.message 
@@ -50,6 +47,38 @@ export const ProductStatsController = {
       
       res.json({ success: true, stats });
     } catch (error) {
+      console.error('Error getting stats:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message 
+      });
+    }
+  },
+  
+  // קבלת סטטיסטיקות למספר מוצרים
+  async getBatchStats(req, res) {
+    try {
+      const { productIds } = req.body;
+      
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'נדרשת רשימת מזהי מוצרים'
+        });
+      }
+      
+      const limitedIds = productIds.slice(0, 20);
+      const statsPromises = limitedIds.map(id => ProductStatsService.getStats(id));
+      const results = await Promise.all(statsPromises);
+      
+      const statsMap = {};
+      limitedIds.forEach((id, index) => {
+        statsMap[id] = results[index];
+      });
+      
+      res.json({ success: true, stats: statsMap });
+    } catch (error) {
+      console.error('Error getting batch stats:', error);
       res.status(500).json({ 
         success: false, 
         message: error.message 

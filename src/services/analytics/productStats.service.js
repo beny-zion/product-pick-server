@@ -1,148 +1,158 @@
-// services/analytics/productStats.service.js
-import Product from '../../models/Product.js';
+/* needed */
+// services/analytics/productStats.service.js - גרסה מפושטת
+import FullProduct from '../../models/FullProduct.js';
 import ProductStats from '../../models/ProductStats.js';
-import { UserInterestsService } from './userInterests.service.js';
 
 export const ProductStatsService = {
-  async trackView(productId, viewDuration, userId = null) {
+  // תיעוד פתיחת מודל מוצר
+  async trackModalOpen(productId, userId = null) {
     try {
-      const currentHour = new Date().getHours();
-      const today = new Date().setHours(0, 0, 0, 0);
-
-      // מצא או צור סטטיסטיקות למוצר
-      let stats = await ProductStats.findOne({ productId });
+      console.log(`[ANALYTICS] Modal opened for product: ${productId}`);
       
-      if (!stats) {
-        // קבל את המוצר כדי לקבל את vendorId
-        const product = await Product.findById(productId);
-        if (!product) {
-          throw new Error('Product not found');
-        }
-
-        // יצירת סטטיסטיקות חדשות
-        stats = new ProductStats({
-          productId,
-          vendorId: product.vendorId,
-          hourlyStats: [{
-            hour: currentHour,
-            date: new Date(today),
-            views: 0,
-            clicks: 0,
-            viewDuration: 0
-          }],
-          dailyStats: {
-            date: new Date(today),
-            totalViews: 0,
-            totalClicks: 0,
-            totalViewTime: 0,
-            averageViewTime: 0
-          }
-        });
+      // קבלת vendorId מהמוצר
+      const product = await FullProduct.findById(productId);
+      if (!product) {
+        console.warn(`Product not found for ID: ${productId}`);
+        return { success: false };
       }
 
-      // עדכון הסטטיסטיקות
-      const hourIndex = stats.hourlyStats.findIndex(
-        stat => stat.hour === currentHour && 
-               stat.date.getTime() === today
-      );
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      if (hourIndex === -1) {
-        stats.hourlyStats.push({
-          hour: currentHour,
-          date: new Date(today),
-          views: 1,
-          viewDuration
-        });
-      } else {
-        stats.hourlyStats[hourIndex].views += 1;
-        stats.hourlyStats[hourIndex].viewDuration += viewDuration;
-      }
-
-      // עדכון סטטיסטיקות יומיות
-      stats.dailyStats.totalViews += 1;
-      stats.dailyStats.totalViewTime += viewDuration;
-      stats.dailyStats.averageViewTime = 
-        stats.dailyStats.totalViewTime / stats.dailyStats.totalViews;
-      
-      stats.lastUpdated = new Date();
-      await stats.save();
-
-      // עדכון תחומי עניין למשתמש אם מחובר
-      if (userId) {
-        await UserInterestsService.trackView(userId, productId);
-      }
-
-      return stats;
-    } catch (error) {
-      console.error('Error tracking view:', error);
-      throw error;
-    }
-  },
-
-  async trackClick(productId, userId = null) {
-    try {
-      const currentHour = new Date().getHours();
-      const today = new Date().setHours(0, 0, 0, 0);
-
-      const stats = await ProductStats.findOneAndUpdate(
+      // עדכון ישיר של פתיחות מודל
+      await ProductStats.findOneAndUpdate(
         { productId },
         {
+          $setOnInsert: {
+            productId,
+            vendorId: product.vendorId,
+            date: today
+          },
           $inc: {
-            'hourlyStats.$[hour].clicks': 1,
-            'dailyStats.totalClicks': 1
+            modalOpens: 1
+          },
+          $set: {
+            lastUpdated: new Date()
           }
         },
-        {
-          arrayFilters: [
-            { 
-              'hour.hour': currentHour, 
-              'hour.date': new Date(today) 
-            }
-          ],
-          upsert: true,
-          new: true
-        }
+        { upsert: true, new: true }
       );
 
-      if (userId) {
-        await UserInterestsService.trackClick(userId, productId);
-      }
-
-      return stats;
+      console.log(`[ANALYTICS] Modal open tracked successfully for product: ${productId}`);
+      return { success: true };
     } catch (error) {
-      console.error('Error tracking click:', error);
+      console.error('[ANALYTICS] Error tracking modal open:', error);
       throw error;
     }
   },
-  async getProductStats(productId, vendorId) {
-    try {
-      const stats = await ProductStats.findOne({ 
-        productId,
-        vendorId  // חשוב לוודא שהמוכר מבקש סטטיסטיקות רק של המוצרים שלו
-      });
 
+  // תיעוד קליק על קישור אפיליאט
+  async trackClick(productId, userId = null) {
+    try {
+      console.log(`[ANALYTICS] Click tracked for product: ${productId}`);
+      
+      // קבלת vendorId מהמוצר
+      const product = await FullProduct.findById(productId);
+      if (!product) {
+        console.warn(`Product not found for ID: ${productId}`);
+        return { success: false };
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // עדכון ישיר של קליקים
+      await ProductStats.findOneAndUpdate(
+        { productId },
+        {
+          $setOnInsert: {
+            productId,
+            vendorId: product.vendorId,
+            date: today
+          },
+          $inc: {
+            clicks: 1
+          },
+          $set: {
+            lastUpdated: new Date()
+          }
+        },
+        { upsert: true, new: true }
+      );
+
+      console.log(`[ANALYTICS] Click tracked successfully for product: ${productId}`);
+      return { success: true };
+    } catch (error) {
+      console.error('[ANALYTICS] Error tracking click:', error);
+      throw error;
+    }
+  },
+  
+  // קבלת סטטיסטיקות למוצר
+  async getStats(productId) {
+    try {
+      const stats = await ProductStats.findOne({ productId });
+      
       if (!stats) {
-        // מחזירים אובייקט ריק אם אין עדיין סטטיסטיקות
         return {
-          totalViews: 0,
+          modalOpens: 0,
+          clicks: 0,
+          conversionRate: 0
+        };
+      }
+      
+      const conversionRate = stats.modalOpens > 0 
+        ? (stats.clicks / stats.modalOpens) * 100 
+        : 0;
+      
+      return {
+        modalOpens: stats.modalOpens || 0,
+        clicks: stats.clicks || 0,
+        conversionRate: Math.round(conversionRate * 100) / 100 // עיגול ל-2 ספרות
+      };
+    } catch (error) {
+      console.error('[ANALYTICS] Error getting stats:', error);
+      throw error;
+    }
+  },
+
+  // קבלת סטטיסטיקות למוכר
+  async getVendorStats(vendorId) {
+    try {
+      const stats = await ProductStats.aggregate([
+        { $match: { vendorId } },
+        {
+          $group: {
+            _id: null,
+            totalModalOpens: { $sum: '$modalOpens' },
+            totalClicks: { $sum: '$clicks' },
+            totalProducts: { $sum: 1 }
+          }
+        }
+      ]);
+
+      if (!stats.length) {
+        return {
+          totalModalOpens: 0,
           totalClicks: 0,
-          averageViewDuration: 0,
-          conversionRate: 0,
-          hourlyStats: []
+          totalProducts: 0,
+          averageConversionRate: 0
         };
       }
 
-      // עיבוד הנתונים לפורמט שנרצה להציג
+      const result = stats[0];
+      const averageConversionRate = result.totalModalOpens > 0 
+        ? (result.totalClicks / result.totalModalOpens) * 100 
+        : 0;
+
       return {
-        totalViews: stats.dailyStats.totalViews || 0,
-        totalClicks: stats.dailyStats.totalClicks || 0,
-        averageViewDuration: stats.dailyStats.averageViewTime || 0,
-        conversionRate: stats.dailyStats.totalViews ? 
-          (stats.dailyStats.totalClicks / stats.dailyStats.totalViews) * 100 : 0,
-        hourlyStats: stats.hourlyStats
+        totalModalOpens: result.totalModalOpens,
+        totalClicks: result.totalClicks,
+        totalProducts: result.totalProducts,
+        averageConversionRate: Math.round(averageConversionRate * 100) / 100
       };
     } catch (error) {
-      console.error('Error getting product stats:', error);
+      console.error('[ANALYTICS] Error getting vendor stats:', error);
       throw error;
     }
   }
