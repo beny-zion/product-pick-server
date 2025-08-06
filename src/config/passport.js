@@ -1,9 +1,11 @@
-/* needed */
 // src/config/passport.js
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../models/User.js';
 import { config } from "dotenv";
+// 🆕 Import הגדרות סביבה
+import { env } from './environment.js';
+
 config();
 
 export const configurePassport = () => {
@@ -12,7 +14,8 @@ export const configurePassport = () => {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3333/user/google/callback"
+    // 🆕 CallbackURL דינמי לפי סביבה!
+    callbackURL: `${env.SERVER_URL}/user/google/callback`
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       // קודם בדיקה לפי Google ID
