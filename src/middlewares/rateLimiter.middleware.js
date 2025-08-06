@@ -13,7 +13,7 @@ import rateLimit from 'express-rate-limit';
 // הגבלה כללית - 100 בקשות ל-15 דקות
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 דקות
-  max: 100, // מקסימום בקשות
+  max: 200, // מקסימום בקשות
   message: 'יותר מדי בקשות מה-IP הזה, נסה שוב בעוד 15 דקות',
   standardHeaders: true,
   legacyHeaders: false,

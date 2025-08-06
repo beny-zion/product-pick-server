@@ -1,91 +1,5 @@
-// // Config imports
-// import { config } from "dotenv";
-// config(); // קודם כל טען את משתני הסביבה
-
-// import express from "express";
-// import cors from "cors";
-// import cookieParser from "cookie-parser";
-// import path from 'path';
-// import { fileURLToPath } from 'url';
-// import passport from 'passport';
-// import { connectToMongoDB } from "./src/config/DB.js";
-// import "./src/config/cloudinary.js";
-// import { tokenService } from './src/services/aliexpress/token.service.js';
-// import { configurePassport } from './src/config/passport.js';
-
-// // Route imports
-// import { authRouter } from './src/routes/auth.route.js';
-// import { analyticsRouter } from './src/routes/analytics.routes.js';
-// import { vendorRouter } from './src/routes/vendor.routes.js';
-// import { aliexpressRouter } from './src/routes/aliexpress.routes.js';
-// import { fullProductRouter } from './src/routes/fullProduct.route.js';
-// import { favoriteRouter } from './src/routes/favorite.routes.js';
-// import { commentRouter } from './src/routes/comment.routes.js';
-// import { vendorQuestionsRouter } from './src/routes/vendor.questions.routes.js';
-// import { searchRouter } from './src/routes/search.routes.js';
-
-
-
-
-// // import schedule from 'node-schedule';
-// // import { updateAllProducts } from './src/services/productUpdateService.js';
-
-// // Initialize app
-// const app = express();
-// const port = Number(process.env.PORT) || 3333;
-
-// // אתחול ההתחברות באמצעות גוגל
-// configurePassport();
-
-
-// // Initialize daily token refresh scheduler
-// tokenService.initializeTokenRefresh();
-
-// // // הגדרת משימה שתרוץ בשעה 2:00 בלילה
-// // schedule.scheduleJob('0 2 * * *', async () => {
-// //   console.log('Running scheduled product update');
-// //   await updateAllProducts();
-// // });
-
-// // Connect to DB
-// connectToMongoDB();
-// // initScheduledTasks();
-// // Basic Middlewares
-// app.use(cors({
-//     optionsSuccessStatus: 200,
-//     credentials: true,
-//     origin: ["http://localhost:9999","https://buy-wise.onrender.com"]
-// }));
-// app.use(express.json());
-// app.use(cookieParser());
-// app.use(passport.initialize());
-
-// // Static files middleware
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-// app.use(express.static(path.join(__dirname, 'client-build')));
-
-// // API Routes
-// app.use('/vendor', vendorRouter);
-// app.use('/analytics', analyticsRouter);
-// app.use('/user', authRouter);
-// app.use('/api/aliexpress', aliexpressRouter);
-// app.use('/full-products', fullProductRouter);
-// app.use('/favorites', favoriteRouter);
-// app.use('/comments', commentRouter);
-// app.use('/vendor', vendorQuestionsRouter);
-// app.use('/search', searchRouter);
-
-
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'client-build', 'index.html'));
-// });
-
-// // Start server
-// app.listen(port, () => console.log(`Server running on port:http://localhost:${port}`));\
 // Config imports
-import { config } from "dotenv";
-config(); // קודם כל טען את משתני הסביבה
+import { env, getAllowedOrigins, getRateLimitConfig, isDevelopment, isProduction } from './src/config/environment.js';
 
 import express from "express";
 import cors from "cors";
@@ -93,10 +7,10 @@ import cookieParser from "cookie-parser";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import passport from 'passport';
-import helmet from 'helmet'; // 🆕 הגנות אבטחה ב-headers
-import csrf from 'csurf'; // 🆕 הגנה מפני CSRF
+import helmet from 'helmet';
+import csrf from 'csurf';
 
-// 🆕 Import Security Middlewares
+// Security Middlewares
 import { generalLimiter, authLimiter } from './src/middlewares/rateLimiter.middleware.js';
 import { sanitizeInput, mongoSanitizer } from './src/middlewares/sanitizer.middleware.js';
 
@@ -118,7 +32,6 @@ import { searchRouter } from './src/routes/search.routes.js';
 
 // Initialize app
 const app = express();
-const port = Number(process.env.PORT) || 3333;
 
 // אתחול ההתחברות באמצעות גוגל
 configurePassport();
@@ -143,56 +56,71 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false, // נחוץ עבור תמונות מ-AliExpress
 }));
 
-// 🆕 Rate limiting כללי
+// 🆕 Rate limiting כללי - מותאם לסביבה
 app.use(generalLimiter);
 
 // Basic Middlewares
 app.use(cors({
     optionsSuccessStatus: 200,
     credentials: true,
-    origin: ["http://localhost:9999","https://buy-wise.onrender.com"]
+    origin: getAllowedOrigins() // 🆕 דינמי לפי סביבה
 }));
 
-app.use(express.json({ limit: '10mb' })); // הגבלת גודל
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // 🆕 Sanitization middlewares - אחרי parsing
-app.use(mongoSanitizer); // מונע NoSQL injection
-app.use(sanitizeInput); // מנקה את כל הקלט
+app.use(mongoSanitizer);
+app.use(sanitizeInput);
 
 app.use(passport.initialize());
 
-// 🆕 CSRF Protection - חייב להיות אחרי cookie-parser
+// 🆕 CSRF Protection - מותאם לסביבה
 const csrfProtection = csrf({ 
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: env.SECURE_COOKIES, // 🆕 דינמי לפי סביבה
     sameSite: 'strict'
   }
 });
+
+// Trust proxy בפרודקשן
+if (isProduction()) {
+  app.set('trust proxy', 1);
+}
 
 // Static files middleware
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, 'client-build')));
 
-// 🆕 Auth routes עם rate limiting מיוחד
+// 🆕 Auth routes עם rate limiting מיוחד - מותאם לסביבה
 app.use('/user', authLimiter, authRouter);
 
-// API Routes (עם CSRF protection)
-app.use('/vendor',  vendorRouter);
+// API Routes
+app.use('/vendor', vendorRouter);
 app.use('/analytics', analyticsRouter);
-app.use('/api/aliexpress',  aliexpressRouter);
-app.use('/full-products',  fullProductRouter);
-app.use('/favorites',  favoriteRouter);
-app.use('/comments',  commentRouter);
-app.use('/vendor',  vendorQuestionsRouter);
+app.use('/api/aliexpress', aliexpressRouter);
+app.use('/full-products', fullProductRouter);
+app.use('/favorites', favoriteRouter);
+app.use('/comments', commentRouter);
+app.use('/vendor', vendorQuestionsRouter);
 app.use('/search', searchRouter);
 
 // 🆕 CSRF token endpoint
 app.get('/api/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
+});
+
+// 🆕 Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    environment: env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 
 // 🆕 Error handling middleware
@@ -206,11 +134,14 @@ app.use((err, req, res, next) => {
   }
   
   // General error handling
-  console.error('Error:', err);
+  if (env.ENABLE_DEBUG_LOGS) {
+    console.error('Error:', err);
+  }
+  
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'שגיאת שרת',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(isDevelopment() && { stack: err.stack }) // Stack trace רק בפיתוח
   });
 });
 
@@ -220,13 +151,18 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-app.listen(port, () => console.log(`
+app.listen(env.PORT, () => {
+  console.log(`
 🔐 Security Features Enabled:
-   ✅ Rate Limiting
+   ✅ Rate Limiting (${env.RATE_LIMIT.MAX_REQUESTS} requests)
    ✅ Input Sanitization
    ✅ CSRF Protection
    ✅ Helmet Security Headers
    ✅ MongoDB Injection Protection
    
-🚀 Server running on: http://localhost:${port}
-`));
+🌍 Environment: ${env.NODE_ENV}
+🚀 Server running on: ${env.SERVER_URL}
+🔗 Client URL: ${env.CLIENT_URL}
+${env.NGROK_URL ? `🔗 Ngrok URL: ${env.NGROK_URL}` : ''}
+`);
+});
