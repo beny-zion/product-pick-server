@@ -125,19 +125,75 @@ export const handleCallback = async (req, res) => {
       }
       
       // מחליף את הקוד בטוקן
+      console.log('Attempting to exchange code for token...');
       const tokenResponse = await getAccessToken(code);
-      console.log('Token response received');
+      
+      // 🆕 לוג מפורט של התגובה
+      console.log('=== FULL TOKEN RESPONSE ===');
+      console.log('Status:', tokenResponse.status);
+      console.log('Headers:', tokenResponse.headers);
+      console.log('Raw Data:', JSON.stringify(tokenResponse.data, null, 2));
+      console.log('=== END TOKEN RESPONSE ===');
+      
+      const tokenData = tokenResponse.data;
+      
+      // 🆕 בדיקה מפורטת של הנתונים
+      console.log('Token data validation:');
+      console.log('- access_token exists:', !!tokenData.access_token);
+      console.log('- refresh_token exists:', !!tokenData.refresh_token);
+      console.log('- expires_in exists:', !!tokenData.expires_in);
+      console.log('- refresh_expires_in exists:', !!tokenData.refresh_expires_in);
+      console.log('- expires_in value:', tokenData.expires_in);
+      console.log('- refresh_expires_in value:', tokenData.refresh_expires_in);
+      
+      // בדיקה שכל הנתונים הנדרשים קיימים
+      if (!tokenData.access_token || !tokenData.refresh_token) {
+        console.error('Missing required token data:', tokenData);
+        return res.status(500).json({
+          success: false,
+          message: 'Invalid response from AliExpress - missing token data',
+          received_data: tokenData
+        });
+      }
+      
+      if (!tokenData.expires_in || !tokenData.refresh_expires_in) {
+        console.error('Missing expiration data:', tokenData);
+        return res.status(500).json({
+          success: false,
+          message: 'Invalid response from AliExpress - missing expiration data',
+          received_data: tokenData
+        });
+      }
       
       // מוחק טוכן ישן אם קיים
       await AliexpressToken.deleteMany({});
       console.log('Old tokens deleted');
       
+      // חישוב תאריכי תפוגה
+      const expiresAt = new Date(Date.now() + (parseInt(tokenData.expires_in) * 1000));
+      const refreshExpiresAt = new Date(Date.now() + (parseInt(tokenData.refresh_expires_in) * 1000));
+      
+      console.log('Calculated dates:');
+      console.log('- expires_at:', expiresAt);
+      console.log('- refresh_expires_at:', refreshExpiresAt);
+      
+      // בדיקה שהתאריכים תקינים
+      if (isNaN(expiresAt.getTime()) || isNaN(refreshExpiresAt.getTime())) {
+        console.error('Invalid date calculations');
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to calculate expiration dates',
+          expires_in: tokenData.expires_in,
+          refresh_expires_in: tokenData.refresh_expires_in
+        });
+      }
+      
       // שומר טוכן חדש
       const newAliexpressToken = await AliexpressToken.create({
-        access_token: tokenResponse.data.access_token,
-        refresh_token: tokenResponse.data.refresh_token,
-        expires_at: new Date(Date.now() + tokenResponse.data.expires_in * 1000),
-        refresh_expires_at: new Date(Date.now() + tokenResponse.data.refresh_expires_in * 1000)
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token,
+        expires_at: expiresAt,
+        refresh_expires_at: refreshExpiresAt
       });
       
       console.log('New AliExpress token saved successfully');
@@ -153,10 +209,20 @@ export const handleCallback = async (req, res) => {
         }
       });
     } catch (error) {
-      console.error('Callback error:', error.response?.data || error.message);
+      console.error('Callback error details:');
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      if (error.response) {
+        console.error('API Error Response:');
+        console.error('Status:', error.response.status);
+        console.error('Data:', JSON.stringify(error.response.data, null, 2));
+      }
+      
       res.status(500).json({ 
         success: false,
-        error: error.response?.data || error.message 
+        error: error.message,
+        details: error.response?.data || 'No additional details'
       });
     }
   };
