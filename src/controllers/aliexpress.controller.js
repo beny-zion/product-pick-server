@@ -148,7 +148,7 @@ export const handleCallback = async (req, res) => {
       
       // בדיקה שכל הנתונים הנדרשים קיימים
       if (!tokenData.access_token || !tokenData.refresh_token) {
-        console.error('Missing required token data:', tokenData);
+        console.error('❌ Missing required token data:', tokenData);
         return res.status(500).json({
           success: false,
           message: 'Invalid response from AliExpress - missing token data',
@@ -157,17 +157,13 @@ export const handleCallback = async (req, res) => {
       }
       
       if (!tokenData.expires_in || !tokenData.refresh_expires_in) {
-        console.error('Missing expiration data:', tokenData);
+        console.error('❌ Missing expiration data:', tokenData);
         return res.status(500).json({
           success: false,
           message: 'Invalid response from AliExpress - missing expiration data',
           received_data: tokenData
         });
       }
-      
-      // מוחק טוכן ישן אם קיים
-      await AliexpressToken.deleteMany({});
-      console.log('Old tokens deleted');
       
       // חישוב תאריכי תפוגה
       const expiresAt = new Date(Date.now() + (parseInt(tokenData.expires_in) * 1000));
@@ -179,7 +175,7 @@ export const handleCallback = async (req, res) => {
       
       // בדיקה שהתאריכים תקינים
       if (isNaN(expiresAt.getTime()) || isNaN(refreshExpiresAt.getTime())) {
-        console.error('Invalid date calculations');
+        console.error('❌ Invalid date calculations');
         return res.status(500).json({
           success: false,
           message: 'Failed to calculate expiration dates',
@@ -188,7 +184,8 @@ export const handleCallback = async (req, res) => {
         });
       }
       
-      // שומר טוכן חדש
+      // 🆕 ✅ תחילה ניצור את הטוכן החדש, רק אחר כך נמחק את הישן!
+      console.log('Creating new token...');
       const newAliexpressToken = await AliexpressToken.create({
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token,
@@ -196,8 +193,20 @@ export const handleCallback = async (req, res) => {
         refresh_expires_at: refreshExpiresAt
       });
       
-      console.log('New AliExpress token saved successfully');
+      console.log('✅ New AliExpress token saved successfully');
+      
+      // 🆕 רק עכשיו נמחק טוכנים ישנים (אם יש יותר מאחד)
+      const tokenCount = await AliexpressToken.countDocuments();
+      if (tokenCount > 1) {
+        // מחק את כולם חוץ מהחדש ביותר
+        await AliexpressToken.deleteMany({ 
+          _id: { $ne: newAliexpressToken._id } 
+        });
+        console.log('✅ Old tokens cleaned up');
+      }
+      
       console.log('Token expires at:', newAliexpressToken.expires_at);
+      console.log('Refresh token expires at:', newAliexpressToken.refresh_expires_at);
       
       // החזרת תגובה מוצלחת
       res.json({ 
@@ -205,11 +214,12 @@ export const handleCallback = async (req, res) => {
         message: '🎉 Authorization successful! You can now use AliExpress API',
         token_info: {
           expires_at: newAliexpressToken.expires_at,
-          refresh_expires_at: newAliexpressToken.refresh_expires_at
+          refresh_expires_at: newAliexpressToken.refresh_expires_at,
+          saved_to_db: true
         }
       });
     } catch (error) {
-      console.error('Callback error details:');
+      console.error('💥 Callback error details:');
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
       
