@@ -51,51 +51,19 @@ export const aliexpressController = {
     }
   };
 
-// 🆕 פונקציה ליצירת חתימה לאימות
-const generateAuthSignature = (params) => {
-  const signStr = '/rest/auth/authorize' + Object.entries(params)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${k}${v}`)
-    .join('');
-  
-  return crypto
-    .createHmac('sha256', process.env.ALIEXPRESS_APP_SECRET)
-    .update(signStr)
-    .digest('hex')
-    .toUpperCase();
-};
-
-// 🆕 פונקציה ליצירת קישור אימות
+// 🆕 פונקציה ליצירת קישור אימות - פשוט בלי חתימה!
 export const initiateAuth = async (req, res) => {
   try {
-    const timestamp = Date.now();
     const redirectUri = 'https://product-pick-server.onrender.com/api/aliexpress/callback';
     
-    // יצירת הפרמטרים (ללא sign)
-    const params = {
-      app_key: process.env.ALIEXPRESS_APP_KEY,
-      response_type: 'code',
-      redirect_uri: redirectUri,
-      state: 'auth_state_123',
-      timestamp: timestamp,
-      sign_method: 'sha256'
-    };
+    // בניית ה-URL הפשוט (בלי חתימה!)
+    const authUrl = 'https://api-sg.aliexpress.com/oauth/authorize?' + 
+      `response_type=code&` +
+      `client_id=${process.env.ALIEXPRESS_APP_KEY}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `force_auth=true`;
     
-    // יצירת החתימה
-    params.sign = generateAuthSignature(params);
-    
-    // בניית ה-URL
-    const authUrl = 'https://api-sg.aliexpress.com/rest/auth/authorize?' + 
-      Object.entries(params)
-        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-        .join('&');
-    
-    console.log('Created auth URL with all required params');
-    console.log('Params:', {
-      ...params,
-      app_key: '***hidden***',
-      sign: '***hidden***'
-    });
+    console.log('Created auth URL:', authUrl);
     
     res.json({
       success: true,
