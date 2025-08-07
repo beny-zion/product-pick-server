@@ -55,11 +55,13 @@ export const aliexpressController = {
 // 🆕 פונקציה ליצירת קישור אימות
 export const initiateAuth = async (req, res) => {
   try {
+    const timestamp = Date.now();
     const authUrl = `https://api-sg.aliexpress.com/rest/auth/authorize?` +
       `response_type=code&` +
-      `client_id=${process.env.ALIEXPRESS_APP_KEY}&` +
+      `app_key=${process.env.ALIEXPRESS_APP_KEY}&` +
       `redirect_uri=${encodeURIComponent('https://product-pick-server.onrender.com/api/aliexpress/callback')}&` +
-      `state=auth_state_123`;
+      `state=auth_state_123&` +
+      `timestamp=${timestamp}`;
     
     console.log('Created auth URL:', authUrl);
     
