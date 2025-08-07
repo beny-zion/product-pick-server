@@ -1,4 +1,3 @@
-/* needed */
 // controllers/aliexpress.controller.js
 import { productService } from '../services/aliexpress/product.service.js';
 import { tokenService } from '../services/aliexpress/token.service.js';
@@ -52,18 +51,51 @@ export const aliexpressController = {
     }
   };
 
+// 🆕 פונקציה ליצירת חתימה לאימות
+const generateAuthSignature = (params) => {
+  const signStr = '/rest/auth/authorize' + Object.entries(params)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}${v}`)
+    .join('');
+  
+  return crypto
+    .createHmac('sha256', process.env.ALIEXPRESS_APP_SECRET)
+    .update(signStr)
+    .digest('hex')
+    .toUpperCase();
+};
+
 // 🆕 פונקציה ליצירת קישור אימות
 export const initiateAuth = async (req, res) => {
   try {
     const timestamp = Date.now();
-    const authUrl = `https://api-sg.aliexpress.com/rest/auth/authorize?` +
-      `response_type=code&` +
-      `app_key=${process.env.ALIEXPRESS_APP_KEY}&` +
-      `redirect_uri=${encodeURIComponent('https://product-pick-server.onrender.com/api/aliexpress/callback')}&` +
-      `state=auth_state_123&` +
-      `timestamp=${timestamp}`;
+    const redirectUri = 'https://product-pick-server.onrender.com/api/aliexpress/callback';
     
-    console.log('Created auth URL:', authUrl);
+    // יצירת הפרמטרים (ללא sign)
+    const params = {
+      app_key: process.env.ALIEXPRESS_APP_KEY,
+      response_type: 'code',
+      redirect_uri: redirectUri,
+      state: 'auth_state_123',
+      timestamp: timestamp,
+      sign_method: 'sha256'
+    };
+    
+    // יצירת החתימה
+    params.sign = generateAuthSignature(params);
+    
+    // בניית ה-URL
+    const authUrl = 'https://api-sg.aliexpress.com/rest/auth/authorize?' + 
+      Object.entries(params)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+    
+    console.log('Created auth URL with all required params');
+    console.log('Params:', {
+      ...params,
+      app_key: '***hidden***',
+      sign: '***hidden***'
+    });
     
     res.json({
       success: true,
@@ -80,7 +112,7 @@ export const initiateAuth = async (req, res) => {
   }
 };
 
-// 🆕 פונקציה ליצירת חתימה
+// 🆕 פונקציה ליצירת חתימה ליצירת טוקן
 const generateSignature = (params, secret) => {
     const signStr = '/auth/token/create' + Object.entries(params)
         .sort(([a], [b]) => a.localeCompare(b))
