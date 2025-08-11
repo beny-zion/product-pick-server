@@ -1,36 +1,31 @@
-// src/middlewares/sanitizer.middleware.js
+// src/middlewares/sanitizer.middleware.js - גרסה מתוקנת
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import mongoSanitize from 'express-mongo-sanitize';
 
 /**
  * 🧹 Sanitizer - ניקוי נתונים מקוד זדוני
- * 
- * מה זה עושה?
- * - מנקה HTML מסוכן (מונע XSS)
- * - מסיר תווים מסוכנים ל-MongoDB
- * - מוודא שהנתונים נקיים לפני שמירה
+ * גרסה מתוקנת - פחות נוקשה לפיתוח
  */
 
-// יצירת DOMPurify instance
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
 
-// פונקציה לניקוי טקסט מ-HTML זדוני
+// 🔧 פונקציה מתוקנת - מאפשרת יותר תוכן
 export const sanitizeHtml = (dirty) => {
   if (!dirty) return '';
   
-  // הגדרות ניקוי - מאפשר רק תגיות בסיסיות
+  // 🔧 הגדרות ניקוי מקלות יותר
   const clean = purify.sanitize(dirty, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'br', 'p'],
-    ALLOWED_ATTR: ['href'],
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'br', 'p', 'span', 'div', 'ul', 'ol', 'li'],
+    ALLOWED_ATTR: ['href', 'title', 'target'],
     ALLOW_DATA_ATTR: false,
   });
   
   return clean;
 };
 
-// Middleware לניקוי כל הנתונים בבקשה
+// 🔧 Middleware מתוקן - פחות נוקשה
 export const sanitizeInput = (req, res, next) => {
   // ניקוי body
   if (req.body) {
@@ -50,7 +45,7 @@ export const sanitizeInput = (req, res, next) => {
   next();
 };
 
-// פונקציה רקורסיבית לניקוי אובייקט
+// 🔧 פונקציה רקורסיבית מתוקנת
 function sanitizeObject(obj) {
   const cleaned = {};
   
@@ -59,18 +54,16 @@ function sanitizeObject(obj) {
       const value = obj[key];
       
       if (typeof value === 'string') {
-        // ניקוי מחרוזות
+        // 🔧 ניקוי מחרוזות מקל יותר
         cleaned[key] = sanitizeString(value);
       } else if (Array.isArray(value)) {
-        // ניקוי מערכים
         cleaned[key] = value.map(item => 
-          typeof item === 'object' ? sanitizeObject(item) : sanitizeString(item)
+          typeof item === 'object' ? sanitizeObject(item) : 
+          typeof item === 'string' ? sanitizeString(item) : item
         );
       } else if (typeof value === 'object' && value !== null) {
-        // ניקוי אובייקטים מקוננים
         cleaned[key] = sanitizeObject(value);
       } else {
-        // העתקת ערכים אחרים כמו שהם
         cleaned[key] = value;
       }
     }
@@ -79,24 +72,29 @@ function sanitizeObject(obj) {
   return cleaned;
 }
 
-// ניקוי מחרוזת בודדת
+// 🔧 ניקוי מחרוזת מתוקן - פחות נוקשה
 function sanitizeString(str) {
   if (typeof str !== 'string') return str;
   
-  // הסרת תווים מסוכנים ל-MongoDB
-  let cleaned = str.replace(/[$]/g, '');
+  // 🔧 הסרת תווים מסוכנים ל-MongoDB בלבד
+  let cleaned = str.replace(/\$where/gi, '').replace(/\$eval/gi, '');
   
-  // הסרת תגיות script ו-style
+  // 🔧 הסרת תגיות script מסוכנות בלבד
   cleaned = cleaned.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  cleaned = cleaned.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  cleaned = cleaned.replace(/javascript:/gi, '');
+  cleaned = cleaned.replace(/on\w+\s*=/gi, ''); // onclick, onload וכו'
   
-  return cleaned.trim();
+  // 🔧 לא עושים trim אוטומטי - יכול להסיר רווחים חשובים
+  return cleaned;
 }
 
-// Middleware של express-mongo-sanitize
+// 🔧 Middleware מתוקן של express-mongo-sanitize
 export const mongoSanitizer = mongoSanitize({
   replaceWith: '_',
   onSanitize: ({ req, key }) => {
-    console.warn(`⚠️ ניסיון לשלוח נתונים מסוכנים: ${key}`);
+    // 🔧 לוג רק בפיתוח
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ ניסיון לשלוח נתונים מסוכנים: ${key}`);
+    }
   }
 });
