@@ -44,16 +44,24 @@ export class SearchService {
         ];
       }
       
-      // פילטר קטגוריות
+      // פילטר קטגוריות - תמיכה בשם ו-ID
       if (filters.categories?.length) {
-        const categoryIds = filters.categories.map(id => String(id));
-        
-        const categoryFilter = {
-          $or: [
-            { 'aliExpressData.categories.main.id': { $in: categoryIds } },
-            { 'aliExpressData.categories.sub.id': { $in: categoryIds } }
-          ]
-        };
+        const categoryValues = filters.categories.map(v => String(v));
+        const hasNumericIds = categoryValues.some(v => /^\d+$/.test(v));
+
+        const categoryFilter = hasNumericIds
+          ? {
+              $or: [
+                { 'aliExpressData.categories.main.id': { $in: categoryValues } },
+                { 'aliExpressData.categories.sub.id': { $in: categoryValues } }
+              ]
+            }
+          : {
+              $or: [
+                { 'aliExpressData.categories.main.name': { $in: categoryValues } },
+                { 'aliExpressData.categories.sub.name': { $in: categoryValues } }
+              ]
+            };
         
         if (matchStage.$or) {
           matchStage.$and = [

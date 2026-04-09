@@ -24,6 +24,7 @@ import { authRouter } from './src/routes/auth.route.js';
 import { analyticsRouter } from './src/routes/analytics.routes.js';
 import { vendorRouter } from './src/routes/vendor.routes.js';
 import { aliexpressRouter } from './src/routes/aliexpress.routes.js';
+import { amazonRouter } from './src/routes/amazon.routes.js';
 import { fullProductRouter } from './src/routes/fullProduct.route.js';
 import { favoriteRouter } from './src/routes/favorite.routes.js';
 import { commentRouter } from './src/routes/comment.routes.js';
@@ -56,7 +57,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false, // נחוץ עבור תמונות מ-AliExpress
 }));
 
-// 🆕 Rate limiting כללי - מותאם לסביבה
+// 🆕 Rate limiting כללי - מותאם לסביבה 
 app.use(generalLimiter);
 
 // Basic Middlewares
@@ -102,6 +103,7 @@ app.use('/user', authLimiter, authRouter);
 app.use('/vendor', vendorRouter);
 app.use('/analytics', analyticsRouter);
 app.use('/api/aliexpress', aliexpressRouter);
+app.use('/api/amazon', amazonRouter);
 app.use('/full-products', fullProductRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/comments', commentRouter);

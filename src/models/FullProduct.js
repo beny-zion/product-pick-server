@@ -8,10 +8,16 @@ const fullProductSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  // מקור המוצר - ברירת מחדל ALIEXPRESS לתאימות אחורה
+  source: {
+    type: String,
+    enum: ['ALIEXPRESS', 'AMAZON'],
+    default: 'ALIEXPRESS',
+    index: true
+  },
   // מזהה מוצר באלי אקספרס
   aliExpressProductId: {
     type: String,
-    required: true,
     index: true
   },
   // כותרת המוצר
@@ -82,6 +88,38 @@ const fullProductSchema = new mongoose.Schema({
       default: Date.now
     }
   },
+  // מזהה מוצר באמזון
+  amazonProductId: {
+    type: String,
+    index: true,
+    sparse: true
+  },
+  // נתוני אמזון
+  amazonData: {
+    price: {
+      type: Number,
+      index: true
+    },
+    originalPrice: Number,
+    discount: String,
+    currency: { type: String, default: 'USD' },
+    categories: {
+      main: { id: String, name: String },
+      sub: { id: String, name: String }
+    },
+    stats: {
+      rating: {
+        type: String,
+        index: true
+      },
+      reviewCount: Number
+    },
+    features: [String],
+    lastChecked: {
+      type: Date,
+      default: Date.now
+    }
+  },
   status: {
     type: String,
     enum: ['ACTIVE', 'INACTIVE'],
@@ -99,9 +137,15 @@ const fullProductSchema = new mongoose.Schema({
   }
 });
 
-// עדכון updatedAt לפני שמירה
+// עדכון updatedAt + ולידציית מקור לפני שמירה
 fullProductSchema.pre('save', function(next) {
   this.updatedAt = new Date();
+
+  // ולידציה שלפחות אחד ממזהי המקור קיים
+  if (!this.aliExpressProductId && !this.amazonProductId) {
+    return next(new Error('Product must have either aliExpressProductId or amazonProductId'));
+  }
+
   next();
 });
 

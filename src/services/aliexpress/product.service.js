@@ -31,12 +31,12 @@ const generateSignature = (params) => {
         product_ids: Array.isArray(productIds) ? productIds.join(',') : productIds,
         sign_method: 'sha256',
         timestamp: Date.now(),
-        target_currency: 'USD',
+        target_currency: 'ILS',
         target_language: 'HE'
       };
-  
+
       params.sign = generateSignature(params);
-  
+
       console.log('Request params:', {
         ...params,
         access_token: '***hidden***',
@@ -106,10 +106,10 @@ const parseProductResponse = (response) => {
       productId: String(product.product_id),
       title: product.product_title,
       price: {
-        // 🔧 תיקון: שימוש במחיר האמיתי במטבע המקורי (CNY) ללא הנחות
-        current: product.original_price, // CNY - המחיר האמיתי ללא הנחות
-        original: product.target_original_price, // USD - מחיר מומר (לא נשתמש)
-        discount: product.discount // לא נשתמש בהנחות יותר
+        current: product.target_sale_price, // USD - מחיר מכירה בפועל
+        original: product.target_original_price, // USD - מחיר מקורי לפני הנחה
+        discount: product.discount,
+        currency: 'ILS'
       },
       images: {
         main: product.product_main_image_url,

@@ -6,7 +6,7 @@ import { VendorAnalyticsController } from '../controllers/analytics/vendor.analy
 import { VendorProductsController } from '../controllers/analytics/vendor.products.controller.js';
 
 const router = express.Router();
-
+// router.get('profile/:id',  VendorAnalyticsController.getVendorProfile);
 // מוצרי המוכר
 router.get('/products', auth, vendorAuth, VendorProductsController.getVendorProducts);
 router.get('/products/:id', auth, vendorAuth, VendorProductsController.getVendorProduct);

@@ -68,7 +68,13 @@ export const env = {
     APP_KEY: process.env.ALIEXPRESS_APP_KEY,
     APP_SECRET: process.env.ALIEXPRESS_APP_SECRET,
   },
-  
+
+  AMAZON: {
+    ACCESS_KEY: process.env.AMAZON_ACCESS_KEY,
+    SECRET_KEY: process.env.AMAZON_SECRET_KEY,
+    PARTNER_TAG: process.env.AMAZON_PARTNER_TAG,
+  },
+
   GOOGLE: {
     CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,

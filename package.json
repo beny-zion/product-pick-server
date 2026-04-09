@@ -13,11 +13,17 @@
     "build": "echo 'No build step required for Node.js server'",
     "lint": "echo 'Add linting here if needed'"
   },
-  "keywords": ["express", "nodejs", "ecommerce", "aliexpress"],
+  "keywords": [
+    "express",
+    "nodejs",
+    "ecommerce",
+    "aliexpress"
+  ],
   "author": "",
   "license": "ISC",
   "description": "Buy-Wise Server - E-commerce recommendation platform",
   "dependencies": {
+    "amazon-paapi": "^1.0.7",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",

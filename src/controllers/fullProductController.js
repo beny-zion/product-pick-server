@@ -598,33 +598,53 @@ export const createFullProduct = async (req, res) => {
     const cleanRecommendation = sanitizeHtml(recommendation);
     const cleanTitle = sanitizeHtml(productData.title);
 
-    // יצירת מוצר חדש
-    const product = new FullProduct({
+    // קביעת מקור המוצר - ברירת מחדל ALIEXPRESS לתאימות אחורה
+    const source = productData.source || 'ALIEXPRESS';
+
+    // נתונים בסיסיים משותפים לכל המקורות
+    const productFields = {
       vendorId: req.user._id,
-      
-      // נתונים שמגיעים מהבקשה
-      aliExpressProductId: productData.productId,
+      source,
       title: cleanTitle,
       displayImage: productData.displayMedia || productData.images.main,
       images: productData.images.small || [],
       recommendation: cleanRecommendation,
-      
-      // בחירה בין לינק שיווקי של המשתמש לבין הלינק הרגיל
-      affiliateLink: productData.isAffiliate ? 
-        productData.links.detail : 
-        productData.links.promotion,
+      affiliateLink: productData.isAffiliate
+        ? productData.links.detail
+        : productData.links.promotion,
       isCustomAffiliateLink: productData.isAffiliate,
-      
-      // נתוני אלי אקספרס
-      aliExpressData: {
+    };
+
+    // נתונים ספציפיים למקור
+    if (source === 'AMAZON') {
+      productFields.amazonProductId = productData.productId;
+      productFields.amazonData = {
+        price: parseFloat(productData.price.current),
+        originalPrice: parseFloat(productData.price.original),
+        discount: productData.price.discount,
+        currency: productData.price.currency || 'USD',
+        categories: productData.categories,
+        stats: {
+          rating: productData.stats?.rating,
+          reviewCount: productData.stats?.reviewCount,
+        },
+        features: productData.features || [],
+        lastChecked: new Date(),
+      };
+    } else {
+      // ALIEXPRESS (ברירת מחדל)
+      productFields.aliExpressProductId = productData.productId;
+      productFields.aliExpressData = {
         price: parseFloat(productData.price.current),
         originalPrice: parseFloat(productData.price.original),
         discount: productData.price.discount,
         categories: productData.categories,
         stats: productData.stats,
-        lastChecked: new Date()
-      }
-    });
+        lastChecked: new Date(),
+      };
+    }
+
+    const product = new FullProduct(productFields);
 
     await product.save();
     
@@ -713,14 +733,22 @@ export const getAllFullProducts = async (req, res) => {
       console.log('🔍 סינון לפי מוכר:', vendorFilter);
     }
     
-    // 🔧 טיפול בקטגוריה - תמיכה בשני הפורמטים
+    // 🔧 טיפול בקטגוריה - תמיכה בשם ו-ID
     const categoryFilter = category || categoryId;
     if (categoryFilter) {
-      filter.$or = [
-        { 'aliExpressData.categories.main.id': String(categoryFilter) },
-        { 'aliExpressData.categories.sub.id': String(categoryFilter) }
-      ];
-      console.log('🔍 סינון לפי קטגוריה:', categoryFilter);
+      const isNumericId = /^\d+$/.test(categoryFilter);
+      if (isNumericId) {
+        filter.$or = [
+          { 'aliExpressData.categories.main.id': String(categoryFilter) },
+          { 'aliExpressData.categories.sub.id': String(categoryFilter) }
+        ];
+      } else {
+        filter.$or = [
+          { 'aliExpressData.categories.main.name': categoryFilter },
+          { 'aliExpressData.categories.sub.name': categoryFilter }
+        ];
+      }
+      console.log('🔍 סינון לפי קטגוריה:', categoryFilter, isNumericId ? '(ID)' : '(name)');
     }
     
     // 🔧 חיפוש טקסט
