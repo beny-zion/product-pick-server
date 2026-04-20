@@ -30,6 +30,10 @@ import { favoriteRouter } from './src/routes/favorite.routes.js';
 import { commentRouter } from './src/routes/comment.routes.js';
 import { vendorQuestionsRouter } from './src/routes/vendor.questions.routes.js';
 import { searchRouter } from './src/routes/search.routes.js';
+import { subscriptionRouter } from './src/routes/subscription.routes.js';
+import { adminRouter } from './src/routes/admin.routes.js';
+import { storeRouter } from './src/routes/store.routes.js';
+import { initSubscriptionJobs } from './src/jobs/subscription.jobs.js';
 
 // Initialize app
 const app = express();
@@ -39,6 +43,9 @@ configurePassport();
 
 // Initialize daily token refresh scheduler
 tokenService.initializeTokenRefresh();
+
+// Initialize subscription cron jobs
+initSubscriptionJobs();
 
 // Connect to DB
 connectToMongoDB();
@@ -109,6 +116,9 @@ app.use('/favorites', favoriteRouter);
 app.use('/comments', commentRouter);
 app.use('/vendor', vendorQuestionsRouter);
 app.use('/search', searchRouter);
+app.use('/subscription', subscriptionRouter);
+app.use('/admin', adminRouter);
+app.use('/stores', storeRouter);
 
 // 🆕 CSRF token endpoint
 app.get('/api/csrf-token', csrfProtection, (req, res) => {

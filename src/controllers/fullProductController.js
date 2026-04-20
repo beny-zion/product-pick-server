@@ -579,6 +579,7 @@
 // };
 // controllers/fullProductController.js - גרסה מתוקנת
 import FullProduct from '../models/FullProduct.js';
+import Store from '../models/Store.js';
 import { productService } from '../services/aliexpress/product.service.js';
 import { sanitizeHtml } from '../middlewares/sanitizer.middleware.js';
 
@@ -601,9 +602,32 @@ export const createFullProduct = async (req, res) => {
     // קביעת מקור המוצר - ברירת מחדל ALIEXPRESS לתאימות אחורה
     const source = productData.source || 'ALIEXPRESS';
 
+    // קביעת חנות — אם לא סופק, שימוש בחנות ברירת מחדל
+    let storeId = productData.storeId;
+    if (storeId) {
+      const store = await Store.findOne({ _id: storeId, vendorId: req.user._id });
+      if (!store) {
+        return res.status(400).json({
+          success: false,
+          message: 'חנות לא נמצאה או לא שייכת למשתמש',
+        });
+      }
+      if (store.isLocked) {
+        return res.status(403).json({
+          success: false,
+          message: 'לא ניתן להוסיף מוצרים לחנות נעולה. שדרג לפרו',
+          code: 'STORE_LOCKED',
+        });
+      }
+    } else {
+      const defaultStore = await Store.getOrCreateDefault(req.user._id, req.user.fullName);
+      storeId = defaultStore._id;
+    }
+
     // נתונים בסיסיים משותפים לכל המקורות
     const productFields = {
       vendorId: req.user._id,
+      storeId,
       source,
       title: cleanTitle,
       displayImage: productData.displayMedia || productData.images.main,
@@ -647,11 +671,15 @@ export const createFullProduct = async (req, res) => {
     const product = new FullProduct(productFields);
 
     await product.save();
-    
+
+    // עדכון ספירת מוצרים בחנות
+    await Store.findByIdAndUpdate(storeId, { $inc: { productCount: 1 } });
+
     // שליפת המוצר המלא עם יחסים
     const populatedProduct = await FullProduct.findById(product._id)
-      .populate('vendorId', 'fullName profileImage');
-    
+      .populate('vendorId', 'fullName profileImage')
+      .populate('storeId', 'name slug logo');
+
     res.status(201).json({
       success: true,
       product: populatedProduct
@@ -668,7 +696,8 @@ export const createFullProduct = async (req, res) => {
 export const getFullProduct = async (req, res) => {
   try {
     const product = await FullProduct.findById(req.params.id)
-      .populate('vendorId', 'fullName profileImage bio social');
+      .populate('vendorId', 'fullName profileImage bio social')
+      .populate('storeId', 'name slug logo isDefault');
     
     if (!product || product.status !== 'ACTIVE') {
       return res.status(404).json({
@@ -833,6 +862,7 @@ export const getAllFullProducts = async (req, res) => {
     // שליפת המוצרים עם population
     const products = await FullProduct.find(filter)
       .populate('vendorId', 'fullName profileImage bio email')
+      .populate('storeId', 'name slug logo isDefault')
       .skip(skip)
       .limit(limitNumber)
       .sort(sortOptions);
@@ -922,11 +952,16 @@ export const updateFullProduct = async (req, res) => {
 export const deleteFullProduct = async (req, res) => {
   try {
     const product = req.product; // מגיע מ-middleware
-    
+
     // מחיקה רכה - שינוי סטטוס בלבד
     product.status = 'INACTIVE';
     await product.save();
-    
+
+    // עדכון ספירת מוצרים בחנות
+    if (product.storeId) {
+      await Store.findByIdAndUpdate(product.storeId, { $inc: { productCount: -1 } });
+    }
+
     res.json({
       success: true,
       message: 'המוצר נמחק בהצלחה'

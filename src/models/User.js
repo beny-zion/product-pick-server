@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true // Default to vendor account
   },
+  role: {
+    type: String,
+    enum: ['user', 'vendor', 'admin'],
+    default: 'vendor',
+  },
   productsLimit: {
     type: Number,
     default: 10 // Default limit for free tier

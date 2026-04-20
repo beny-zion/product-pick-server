@@ -4,6 +4,7 @@ import express from 'express';
 import { auth } from '../middlewares/middleware.auth.js';
 import { checkProductOwnership } from '../middlewares/checkOwnership.middleware.js';
 import { createContentLimiter } from '../middlewares/rateLimiter.middleware.js';
+import { enforceAffiliateLimit } from '../middlewares/subscription.middleware.js';
 import { 
   createFullProduct, 
   getFullProduct, 
@@ -90,10 +91,11 @@ router.get('/', getAllFullProducts);
 router.get('/:id', validateProductId, getFullProduct);
 
 // נתיבים מוגנים (דורשים הרשאות)
-router.post('/', 
-  auth, 
-  createContentLimiter, 
-  validateCreateProduct, 
+router.post('/',
+  auth,
+  createContentLimiter,
+  validateCreateProduct,
+  enforceAffiliateLimit,
   createFullProduct
 );
 

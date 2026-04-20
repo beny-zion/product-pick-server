@@ -79,6 +79,19 @@ export const env = {
     CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   },
+
+  // HYP Payment
+  HYP: {
+    TERMINAL_NUMBER: process.env.HYP_TERMINAL_NUMBER,
+    MID: process.env.HYP_MID,
+    API_URL: process.env.HYP_API_URL || 'https://iussl.hyp.co.il/cgi-bin/Hyp/Community/KP/CommEx',
+    SUCCESS_URL: process.env.HYP_SUCCESS_URL,
+    ERROR_URL: process.env.HYP_ERROR_URL,
+    CANCEL_URL: process.env.HYP_CANCEL_URL,
+  },
+
+  // Admin
+  ADMIN_EMAILS: (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean),
   
   // Development specific
   NGROK_URL: process.env.NGROK_URL,

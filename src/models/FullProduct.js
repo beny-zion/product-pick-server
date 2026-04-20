@@ -8,6 +8,11 @@ const fullProductSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  storeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Store',
+    index: true,
+  },
   // מקור המוצר - ברירת מחדל ALIEXPRESS לתאימות אחורה
   source: {
     type: String,
@@ -166,6 +171,7 @@ fullProductSchema.index({
 });
 
 // אינדקסים מורכבים לביצועים
+fullProductSchema.index({ storeId: 1, status: 1, createdAt: -1 }, { name: 'store_status_created' });
 fullProductSchema.index({ status: 1, vendorId: 1 }, { name: 'status_vendor' });
 fullProductSchema.index({ status: 1, 'aliExpressData.price': 1 }, { name: 'status_price' });
 fullProductSchema.index({ status: 1, 'aliExpressData.stats.rating': -1 }, { name: 'status_rating' });

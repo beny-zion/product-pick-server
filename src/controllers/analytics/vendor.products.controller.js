@@ -1,6 +1,7 @@
 /* needed */
 // controllers/vendor/vendor.products.controller.js
 import FullProduct from '../../models/FullProduct.js';
+import Store from '../../models/Store.js';
 
 export const VendorProductsController = {
   // קבלת כל המוצרים של המוכר
@@ -11,12 +12,32 @@ export const VendorProductsController = {
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
 
-      const products = await FullProduct.find({ vendorId })
-        .sort({ createdAt: -1 })  // מיון לפי תאריך יצירה - החדש ביותר קודם
+      // Lazy migration: שיוך מוצרים ללא חנות לחנות ברירת מחדל
+      const orphanCount = await FullProduct.countDocuments({ vendorId, storeId: { $exists: false } });
+      const orphanCountNull = await FullProduct.countDocuments({ vendorId, storeId: null });
+      if (orphanCount > 0 || orphanCountNull > 0) {
+        const defaultStore = await Store.getOrCreateDefault(vendorId, req.user.fullName);
+        await FullProduct.updateMany(
+          { vendorId, $or: [{ storeId: { $exists: false } }, { storeId: null }] },
+          { $set: { storeId: defaultStore._id } }
+        );
+        // עדכון ספירת מוצרים
+        const count = await FullProduct.countDocuments({ storeId: defaultStore._id, status: 'ACTIVE' });
+        await Store.findByIdAndUpdate(defaultStore._id, { productCount: count });
+      }
+
+      const filter = { vendorId };
+      if (req.query.storeId) {
+        filter.storeId = req.query.storeId;
+      }
+
+      const products = await FullProduct.find(filter)
+        .populate('storeId', 'name slug logo isLocked isDefault')
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
-      const totalProducts = await FullProduct.countDocuments({ vendorId });
+      const totalProducts = await FullProduct.countDocuments(filter);
 
       res.json({
         success: true,
@@ -91,15 +112,16 @@ export const VendorProductsController = {
       
       // שדות שמותר למוכר לעדכן
       const allowedUpdates = [
-        'title', 
-        'recommendation', 
+        'title',
+        'recommendation',
         'displayImage',
         'status',
         'images',
         'isCustomAffiliateLink',
-        'affiliateLink'
+        'affiliateLink',
+        'storeId'
       ];
-      
+
       // מיפוי העדכונים המותרים בלבד
       const filteredUpdates = {};
       Object.keys(updates).forEach(key => {
@@ -107,7 +129,27 @@ export const VendorProductsController = {
           filteredUpdates[key] = updates[key];
         }
       });
-      
+
+      // ולידציה והעברת מוצר בין חנויות
+      if (filteredUpdates.storeId) {
+        const targetStore = await Store.findOne({ _id: filteredUpdates.storeId, vendorId });
+        if (!targetStore) {
+          return res.status(400).json({ success: false, message: 'חנות יעד לא תקינה' });
+        }
+        if (targetStore.isLocked) {
+          return res.status(400).json({
+            success: false,
+            message: 'לא ניתן להעביר מוצרים לחנות נעולה',
+            code: 'TARGET_STORE_LOCKED',
+          });
+        }
+        // עדכון ספירת מוצרים
+        if (product.storeId && product.storeId.toString() !== filteredUpdates.storeId) {
+          await Store.findByIdAndUpdate(product.storeId, { $inc: { productCount: -1 } });
+          await Store.findByIdAndUpdate(filteredUpdates.storeId, { $inc: { productCount: 1 } });
+        }
+      }
+
       // עדכון המוצר
       const updatedProduct = await FullProduct.findByIdAndUpdate(
         productId,
